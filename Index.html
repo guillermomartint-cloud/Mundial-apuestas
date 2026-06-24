@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>¿Quién será el tercero? — Mundial 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap');
+
+  :root {
+    --green-dark: #0a2e1a;
+    --green-mid: #1a5c32;
+    --green-field: #2d8a4e;
+    --gold: #f0c040;
+    --gold-dim: #a07c1a;
+    --white: #f5f5f0;
+    --gray: #8a9a8e;
+    --red: #e03030;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--green-dark);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── PANTALLA 1: SETUP ── */
+  #screen-setup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .title-block {
+    text-align: center;
+  }
+  .title-block .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .title-block h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    line-height: 0.95;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+  .title-block h1 span {
+    color: var(--gold);
+  }
+
+  .setup-form {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 100%;
+    max-width: 560px;
+  }
+  .setup-form h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.05em;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+    text-align: center;
+  }
+  .countries-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+  }
+  .country-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    transition: border-color 0.2s;
+  }
+  .country-input:focus-within {
+    border-color: var(--gold);
+  }
+  .country-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    min-width: 1.4rem;
+    text-align: center;
+  }
+  .country-input input {
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    width: 100%;
+  }
+  .country-input input::placeholder { color: var(--gray); }
+
+  .btn-reveal {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    background: var(--gold);
+    color: var(--green-dark);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.1em;
+    border: none;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn-reveal:hover { background: #ffd060; transform: translateY(-1px); }
+  .btn-reveal:active { transform: translateY(0); }
+  .btn-reveal:disabled { background: var(--gold-dim); cursor: not-allowed; transform: none; }
+
+  /* ── PANTALLA 2: RESULTADOS ── */
+  #screen-results {
+    display: none;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .results-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+  .results-header .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+  .results-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
+    line-height: 1;
+    color: var(--white);
+  }
+
+  /* terceros oficiales */
+  .official-strip {
+    background: linear-gradient(135deg, var(--green-mid), var(--green-field));
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .official-strip h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+  .official-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  .tag {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 2rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--white);
+  }
+  .tag.matched {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--green-dark);
+  }
+
+  /* tabla de rankings */
+  .ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .rank-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0.75rem;
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    cursor: pointer;
+  }
+  .rank-card.visible { opacity: 1; transform: translateX(0); }
+  .rank-card.expanded { background: rgba(255,255,255,0.08); }
+
+  .rank-card.pos-1 { border-color: var(--gold); background: rgba(240,192,64,0.08); }
+  .rank-card.pos-2 { border-color: #c0c0c0; background: rgba(192,192,192,0.06); }
+  .rank-card.pos-3 { border-color: #cd7f32; background: rgba(205,127,50,0.06); }
+
+  .rank-pos {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    min-width: 2.2rem;
+    text-align: center;
+    line-height: 1;
+  }
+  .pos-1 .rank-pos { color: var(--gold); }
+  .pos-2 .rank-pos { color: #c0c0c0; }
+  .pos-3 .rank-pos { color: #cd7f32; }
+  .rank-card:not(.pos-1):not(.pos-2):not(.pos-3) .rank-pos { color: var(--gray); font-size: 1.3rem; }
+
+  .rank-info { flex: 1; min-width: 0; }
+  .rank-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .rank-picks-preview {
+    font-size: 0.72rem;
+    color: var(--gray);
+    margin-top: 0.15rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .rank-score-block { text-align: right; }
+  .rank-score {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    line-height: 1;
+    color: var(--white);
+  }
+  .pos-1 .rank-score { color: var(--gold); }
+  .rank-score-label {
+    font-size: 0.65rem;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* detalle expandible */
+  .rank-detail {
+    display: none;
+    padding-top: 0.8rem;
+    margin-top: 0.6rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    grid-column: 1 / -1;
+  }
+  .rank-card.expanded .rank-detail { display: flex; }
+  .detail-tag {
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 2rem;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: var(--gray);
+  }
+  .detail-tag.hit {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--green-dark);
+    font-weight: 700;
+    color: var(--green-dark);
+  }
+
+  .expand-hint {
+    font-size: 0.65rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 0.1rem;
+  }
+
+  /* botón reiniciar */
+  .btn-reset {
+    margin: 2.5rem auto 0;
+    display: block;
+    padding: 0.6rem 1.5rem;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 2rem;
+    color: var(--gray);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-reset:hover { border-color: var(--white); color: var(--white); }
+
+  /* animación de confeti para el ganador */
+  .confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    top: -10px;
+    border-radius: 2px;
+    animation: confetti-fall linear forwards;
+    pointer-events: none;
+    z-index: 999;
+  }
+  @keyframes confetti-fall {
+    to { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* responsive */
+  @media (max-width: 480px) {
+    .countries-grid { grid-template-columns: 1fr; }
+    .rank-pos { font-size: 1.4rem; min-width: 1.8rem; }
+    .rank-score { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PANTALLA 1: Ingresar terceros -->
+<div id="screen-setup">
+  <div class="title-block">
+    <div class="eyebrow">Mundial 2026 — Juego familiar</div>
+    <h1>¿Quién será<br><span>el tercero?</span></h1>
+  </div>
+
+  <div class="setup-form">
+    <h2>Ingresá los 8 mejores terceros</h2>
+    <div class="countries-grid" id="countries-grid">
+      <!-- generado por JS -->
+    </div>
+    <button class="btn-reveal" id="btn-reveal" onclick="showResults()">
+      ⚽ REVELAR RESULTADOS
+    </button>
+  </div>
+</div>
+
+<!-- PANTALLA 2: Resultados -->
+<div id="screen-results">
+  <div class="results-header">
+    <div class="eyebrow">Mundial 2026 — Resultados</div>
+    <h1>¿Quién será el tercero?</h1>
+  </div>
+
+  <div class="official-strip">
+    <h3>🏆 Los mejores terceros oficiales</h3>
+    <div class="official-tags" id="official-tags"></div>
+  </div>
+
+  <div class="ranking-list" id="ranking-list"></div>
+
+  <button class="btn-reset" onclick="resetToSetup()">← Volver a ingresar terceros</button>
+</div>
+
+<script>
+  // ── DATOS DE PARTICIPANTES ──
+  const PARTICIPANTS = [
+    { name: "Mabel",      email: "mabeltrive@gmail.com",          picks: ["Austria","Colombia","Curaçao","Ecuador","Egipto","Japón","Paraguay","Uruguay"] },
+    { name: "Ma. Triv",   email: "matrivellini@gmail.com",         picks: ["Austria","Bélgica","Costa de Marfil","Curaçao","Irlanda del Norte","Paraguay","Sudáfrica","Uruguay"] },
+    { name: "Marta",      email: "martatrivellini.mt@gmail.com",   picks: ["Alemania","Argentina","Brasil","Costa de Marfil","Ecuador","Francia","Inglaterra","Senegal"] },
+    { name: "Joaquín",    email: "joaquinlirio02@gmail.com",       picks: ["Argelia","Colombia","Costa de Marfil","Ecuador","México","Paraguay","Senegal","Uruguay"] },
+    { name: "Verónica",   email: "veronicarivoir128@gmail.com",    picks: ["Bélgica","Bosnia y Herzegovina","Costa de Marfil","Ecuador","Paraguay","República Checa","Senegal","Suecia"] },
+    { name: "Evangelina", email: "evangelinamuller84@gmail.com",   picks: ["Alemania","Brasil","Cabo Verde","España","Estados Unidos","Países Bajos","Portugal","Uruguay"] },
+    { name: "Martín J.",  email: "martinjorge1952@gmail.com",      picks: ["Argelia","Australia","Ecuador","Escocia","Irán","Senegal","Suecia","Uruguay"] },
+    { name: "Claudita",   email: "lateacherclaudita@gmail.com",    picks: ["Alemania","Cabo Verde","Escocia","Francia","Ghana","Noruega","Países Bajos","Portugal"] },
+    { name: "Crivor",     email: "crivoir82@gmail.com",            picks: ["Argelia","Bélgica","Bosnia y Herzegovina","Croacia","Escocia","Paraguay","Suecia","Uruguay"] },
+    { name: "Guille",     email: "guillermo.martint@gmail.com",    picks: ["Argelia","Bosnia y Herzegovina","Escocia","Ghana","Paraguay","Rep. D. del Congo","Senegal","Suecia"] },
+    { name: "Ara",        email: "ara.frankow@gmail.com",          picks: ["Argelia","Bosnia y Herzegovina","Escocia","Ghana","Paraguay","Rep. D. del Congo","Senegal","Suecia"] },
+    { name: "Santi",      email: "santiochoa39@gmail.com",         picks: ["Austria","Bélgica","Corea del Sur","Ecuador","Escocia","Paraguay","Arabia Saudita","Uruguay"] },
+    { name: "Franki",     email: "franquitomaro1995@gmail.com",    picks: ["Argelia","Croacia","Ecuador","Escocia","Irán","Paraguay","Arabia Saudita","Uruguay"] },
+    { name: "Ale",        email: "ale.palaversich@gmail.com",      picks: ["Argelia","Bosnia y Herzegovina","Escocia","Ghana","Paraguay","Rep. D. del Congo","Senegal","Suecia"] },
+    { name: "Liliana",    email: "lilianatrivellini@gmail.com",    picks: ["Argelia","Australia","Croacia","Ecuador","Escocia","Irán","Suecia","Uruguay"] },
+    { name: "Luisito",   email: "",                                picks: ["Bosnia y Herzegovina","Escocia","Paraguay","Suecia","Uruguay","Senegal","Argelia","Ghana"] },
+  ];
+
+  // ── BUILD INPUTS ──
+  const grid = document.getElementById('countries-grid');
+  for (let i = 1; i <= 8; i++) {
+    grid.innerHTML += `
+      <div class="country-input">
+        <span class="country-num">${i}</span>
+        <input type="text" id="c${i}" placeholder="País ${i}" autocomplete="off" oninput="checkReady()">
+      </div>`;
+  }
+
+  function normalize(str) {
+    return str.trim().toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ");
+  }
+
+  function checkReady() {
+    const all = Array.from({length:8}, (_,i) => document.getElementById(`c${i+1}`).value.trim());
+    document.getElementById('btn-reveal').disabled = all.some(v => v === '');
+  }
+  checkReady();
+
+  function getOfficialCountries() {
+    return Array.from({length:8}, (_,i) => document.getElementById(`c${i+1}`).value.trim()).filter(Boolean);
+  }
+
+  function showResults() {
+    const official = getOfficialCountries();
+    if (official.length < 8) return;
+
+    const normOfficial = official.map(normalize);
+
+    // score each participant
+    const scored = PARTICIPANTS.map(p => {
+      const hits = p.picks.filter(pick => normOfficial.includes(normalize(pick)));
+      return { ...p, hits, score: hits.length };
+    });
+
+    // sort desc, then alpha
+    scored.sort((a,b) => b.score - a.score || a.name.localeCompare(b.name));
+
+    // assign ranks (tied = same rank)
+    let currentRank = 1;
+    for (let i = 0; i < scored.length; i++) {
+      if (i > 0 && scored[i].score < scored[i-1].score) currentRank = i + 1;
+      scored[i].rank = currentRank;
+    }
+
+    // render official tags
+    const tagsEl = document.getElementById('official-tags');
+    tagsEl.innerHTML = official.map(c => `<span class="tag matched">${c}</span>`).join('');
+
+    // render ranking
+    const listEl = document.getElementById('ranking-list');
+    listEl.innerHTML = '';
+
+    scored.forEach((p, idx) => {
+      const posClass = p.rank <= 3 ? `pos-${p.rank}` : '';
+      const medal = p.rank === 1 ? '🥇' : p.rank === 2 ? '🥈' : p.rank === 3 ? '🥉' : '';
+      const rankLabel = medal || `#${p.rank}`;
+
+      const detailTags = p.picks.map(pick => {
+        const isHit = normOfficial.includes(normalize(pick));
+        return `<span class="detail-tag ${isHit ? 'hit' : ''}">${pick}</span>`;
+      }).join('');
+
+      const previewHits = p.hits.length ? p.hits.join(', ') : 'Sin aciertos';
+
+      const card = document.createElement('div');
+      card.className = `rank-card ${posClass}`;
+      card.innerHTML = `
+        <div class="rank-pos">${rankLabel}</div>
+        <div class="rank-info">
+          <div class="rank-name">${p.name}</div>
+          <div class="rank-picks-preview">${previewHits}</div>
+          <div class="expand-hint">toca para ver todo</div>
+          <div class="rank-detail">${detailTags}</div>
+        </div>
+        <div class="rank-score-block">
+          <div class="rank-score">${p.score}</div>
+          <div class="rank-score-label">aciertos</div>
+        </div>`;
+
+      card.addEventListener('click', () => card.classList.toggle('expanded'));
+      listEl.appendChild(card);
+
+      // animate in staggered
+      setTimeout(() => card.classList.add('visible'), 80 + idx * 120);
+    });
+
+    // switch screens
+    document.getElementById('screen-setup').style.display = 'none';
+    const resScreen = document.getElementById('screen-results');
+    resScreen.style.display = 'flex';
+
+    // confetti for winner
+    setTimeout(() => launchConfetti(), 80 + scored.length * 120 + 300);
+  }
+
+  function launchConfetti() {
+    const colors = ['#f0c040','#2d8a4e','#ffffff','#ffd060','#a0d080'];
+    for (let i = 0; i < 60; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'confetti-piece';
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.background = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDuration = (2 + Math.random() * 2) + 's';
+        el.style.animationDelay = '0s';
+        el.style.transform = `rotate(${Math.random()*360}deg)`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 4500);
+      }, i * 40);
+    }
+  }
+
+  function resetToSetup() {
+    document.getElementById('screen-results').style.display = 'none';
+    document.getElementById('screen-setup').style.display = 'flex';
+  }
+</script>
+</body>
+</html>
